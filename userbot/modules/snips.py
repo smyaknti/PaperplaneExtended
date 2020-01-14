@@ -8,10 +8,7 @@ from userbot.events import register
 from userbot import CMD_HELP, BOTLOG_CHATID
 
 
-@register(outgoing=True,
-          pattern=r"\$\w*",
-          ignore_unsafe=True,
-          disable_errors=True)
+@register(outgoing=True, pattern=r"\$\w*", disable_errors=True)
 async def on_snip(event):
     """ Snips logic. """
     try:
@@ -30,13 +27,15 @@ async def on_snip(event):
                                         msg_o.message,
                                         reply_to=message_id_to_reply,
                                         file=msg_o.media)
+        await event.delete()
     elif snip and snip.reply:
         await event.client.send_message(event.chat_id,
-                                        note.reply,
+                                        snip.reply,
                                         reply_to=message_id_to_reply)
+        await event.delete()
 
 
-@register(outgoing=True, pattern="^.snip (\w*)")
+@register(outgoing=True, pattern="^\.snip (\w*)")
 async def on_snip_save(event):
     """ For .snip command, saves snips for future use. """
     try:
@@ -76,7 +75,7 @@ async def on_snip_save(event):
         await event.edit(success.format('saved', keyword))
 
 
-@register(outgoing=True, pattern="^.snips$")
+@register(outgoing=True, pattern="^\.snips$")
 async def on_snip_list(event):
     """ For .snips command, lists snips saved by you. """
     try:
@@ -97,7 +96,7 @@ async def on_snip_list(event):
     await event.edit(message)
 
 
-@register(outgoing=True, pattern="^.remsnip (\w*)")
+@register(outgoing=True, pattern="^\.remsnip (\w*)")
 async def on_snip_delete(event):
     """ For .remsnip command, deletes a snip. """
     try:

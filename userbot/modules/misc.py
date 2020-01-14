@@ -14,11 +14,11 @@ import os
 import io
 import sys
 import json
-from userbot import BOTLOG, BOTLOG_CHATID, CMD_HELP, bot
+from userbot import BOTLOG, BOTLOG_CHATID, CMD_HELP, bot, UPSTREAM_REPO_URL
 from userbot.events import register
 
 
-@register(outgoing=True, pattern="^.random")
+@register(outgoing=True, pattern="^\.random")
 async def randomise(items):
     """ For .random command, get a random item from the list of items. """
     itemo = (items.text[8:]).split()
@@ -32,7 +32,7 @@ async def randomise(items):
                      itemo[index] + "`")
 
 
-@register(outgoing=True, pattern="^.sleep( [0-9]+)?$")
+@register(outgoing=True, pattern="^\.sleep( [0-9]+)?$")
 async def sleepybot(time):
     """ For .sleep command, let the userbot snooze for a few second. """
     message = time.text
@@ -51,7 +51,7 @@ async def sleepybot(time):
         await time.edit("`OK, I'm awake now.`")
 
 
-@register(outgoing=True, pattern="^.shutdown$")
+@register(outgoing=True, pattern="^\.shutdown$")
 async def killdabot(event):
     """ For .shutdown command, shut the bot down."""
     await event.edit("`Goodbye *Windows XP shutdown sound*....`")
@@ -61,7 +61,7 @@ async def killdabot(event):
     await bot.disconnect()
 
 
-@register(outgoing=True, pattern="^.restart$")
+@register(outgoing=True, pattern="^\.restart$")
 async def killdabot(event):
     await event.edit("`BRB... *PornHub intro*`")
     if BOTLOG:
@@ -70,45 +70,10 @@ async def killdabot(event):
     await bot.disconnect()
     # Spin a new instance of bot
     execl(sys.executable, sys.executable, *sys.argv)
-    # Shut the existing one down
-    exit()
-
-
-@register(outgoing=True, pattern="^.community$")
-async def bot_community(community):
-    """ For .community command, just returns OG Paperplane's group link. """
-    await community.edit(
-        "Join RaphielGang's awesome userbot community: @userbot_support"
-        "\nDo note that Paperplane Extended is an unoficial fork of their "
-        "Paperplane project and it may get limited or no support for bugs.")
-
-
-@register(outgoing=True, pattern="^.support$")
-async def bot_support(wannahelp):
-    """ For .support command, just returns the group link. """
-    await wannahelp.edit(
-        "Join the Paperplane Extended Channel: @PaperplaneExtended\
-        \nJoin the Paperplane Extended Chat: @PaperplaneExtendedSupport")
-
-
-@register(outgoing=True, pattern="^.creator$")
-async def creator(e):
-    await e.edit("[AvinashReddy3108](https://t.me/AvinashReddy3108)")
-
-
-@register(outgoing=True, pattern="^.readme$")
-async def reedme(e):
-    await e.edit(
-        "Here's something for you to read:\n"
-        "\n[Paperplane Extended's README.md file](https://github.com/AvinashReddy3108/PaperplaneExtended/blob/sql-extended/README.md)"
-        "\n[Setup Guide - Basic](https://telegra.ph/How-to-host-a-Telegram-Userbot-07-24)"
-        "\n[Setup Guide - Google Drive](https://telegra.ph/How-To-Setup-GDrive-07-27)"
-        "\n[Setup Guide - LastFM Module](https://telegra.ph/How-to-set-up-LastFM-module-for-Paperplane-userbot-08-10)"
-    )
 
 
 # Copyright (c) Gegham Zakaryan | 2019
-@register(outgoing=True, pattern="^.repeat (.*)")
+@register(outgoing=True, pattern="^\.repeat (.*)")
 async def repeat(rep):
     cnt, txt = rep.pattern_match.group(1).split(' ', 1)
     replyCount = int(cnt)
@@ -122,15 +87,14 @@ async def repeat(rep):
     await rep.edit(replyText)
 
 
-@register(outgoing=True, pattern="^.repo$")
+@register(outgoing=True, pattern="^\.repo$")
 async def repo_is_here(wannasee):
     """ For .repo command, just returns the repo URL. """
     await wannasee.edit(
-        "Click [here](https://github.com/AvinashReddy3108/PaperplaneExtended) to open Paperplane Extended's GitHub page."
-    )
+        f"Click [here]({UPSTREAM_REPO_URL}) to open my userbot's repository.")
 
 
-@register(outgoing=True, pattern="^.raw$")
+@register(outgoing=True, pattern="^\.raw$")
 async def raw(event):
     the_real_message = None
     reply_to_id = None
@@ -173,16 +137,6 @@ CMD_HELP.update({
 hear Windows XP shutdown sound... but you don't."
 })
 
-CMD_HELP.update(
-    {'support': ".support\
-\nUsage: If you need help, use this command."})
-
-CMD_HELP.update({
-    'community':
-    ".community\
-\nUsage: Join the awesome Paperplane userbot community !!"
-})
-
 CMD_HELP.update({
     'repo':
     '.repo\
@@ -194,10 +148,6 @@ CMD_HELP.update({
     ".readme\
 \nUsage: Provide links to setup the userbot and it's modules."
 })
-
-CMD_HELP.update(
-    {"creator": ".creator\
-\nUsage: Know who created this awesome userbot !!"})
 
 CMD_HELP.update({
     "repeat":

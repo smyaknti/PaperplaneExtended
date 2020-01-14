@@ -18,10 +18,10 @@ from telethon.tl.functions.channels import (EditAdminRequest,
                                             EditBannedRequest,
                                             EditPhotoRequest)
 from telethon.tl.functions.messages import UpdatePinnedMessageRequest
-from telethon.tl.types import (PeerChannel, ChannelParticipantsAdmins,
-                               ChatAdminRights, ChatBannedRights,
-                               MessageEntityMentionName, MessageMediaPhoto,
-                               ChannelParticipantsBots)
+from telethon.tl.types import (PeerChat, PeerChannel,
+                               ChannelParticipantsAdmins, ChatAdminRights,
+                               ChatBannedRights, MessageEntityMentionName,
+                               MessageMediaPhoto, ChannelParticipantsBots)
 
 from userbot import BOTLOG, BOTLOG_CHATID, CMD_HELP, bot
 from userbot.events import register
@@ -68,7 +68,7 @@ UNMUTE_RIGHTS = ChatBannedRights(until_date=None, send_messages=False)
 # ================================================
 
 
-@register(outgoing=True, pattern="^.setgpic$", groups_only=True)
+@register(outgoing=True, pattern="^\.setgpic$", groups_only=True)
 async def set_group_photo(gpic):
     """ For .setgpic command, changes the picture of a group """
     if not gpic.is_group:
@@ -105,7 +105,7 @@ async def set_group_photo(gpic):
             await gpic.edit(PP_ERROR)
 
 
-@register(outgoing=True, pattern="^.promote(?: |$)(.*)", groups_only=True)
+@register(outgoing=True, pattern="^\.promote(?: |$)(.*)", groups_only=True)
 async def promote(promt):
     """ For .promote command, promotes the replied/tagged person """
     # Get targeted chat
@@ -156,7 +156,7 @@ async def promote(promt):
             f"CHAT: {promt.chat.title}(`{promt.chat_id}`)")
 
 
-@register(outgoing=True, pattern="^.demote(?: |$)(.*)", groups_only=True)
+@register(outgoing=True, pattern="^\.demote(?: |$)(.*)", groups_only=True)
 async def demote(dmod):
     """ For .demote command, demotes the replied/tagged person """
     # Admin right check
@@ -205,7 +205,7 @@ async def demote(dmod):
             f"CHAT: {dmod.chat.title}(`{dmod.chat_id}`)")
 
 
-@register(outgoing=True, pattern="^.ban(?: |$)(.*)", groups_only=True)
+@register(outgoing=True, pattern="^\.ban(?: |$)(.*)", groups_only=True)
 async def ban(bon):
     """ For .ban command, bans the replied/tagged person """
     # Here laying the sanity check
@@ -261,7 +261,7 @@ async def ban(bon):
             f"CHAT: {bon.chat.title}(`{bon.chat_id}`)")
 
 
-@register(outgoing=True, pattern="^.unban(?: |$)(.*)", groups_only=True)
+@register(outgoing=True, pattern="^\.unban(?: |$)(.*)", groups_only=True)
 async def nothanos(unbon):
     """ For .unban command, unbans the replied/tagged person """
     # Here laying the sanity check
@@ -298,7 +298,7 @@ async def nothanos(unbon):
         await unbon.edit("`Uh oh my unban logic broke!`")
 
 
-@register(outgoing=True, pattern="^.mute(?: |$)(.*)", groups_only=True)
+@register(outgoing=True, pattern="^\.mute(?: |$)(.*)", groups_only=True)
 async def spider(spdr):
     """
     This function is basically muting peeps
@@ -358,7 +358,7 @@ async def spider(spdr):
             return await spdr.edit("`Uh oh my mute logic broke!`")
 
 
-@register(outgoing=True, pattern="^.unmute(?: |$)(.*)", groups_only=True)
+@register(outgoing=True, pattern="^\.unmute(?: |$)(.*)", groups_only=True)
 async def unmoot(unmot):
     """ For .unmute command, unmute the replied/tagged person """
     # Admin or creator check
@@ -406,7 +406,7 @@ async def unmoot(unmot):
                 f"CHAT: {unmot.chat.title}(`{unmot.chat_id}`)")
 
 
-@register(incoming=True, disable_edited=True)
+@register(incoming=True, disable_errors=True)
 async def muter(moot):
     """ Used for deleting the messages of muted people """
     try:
@@ -429,15 +429,24 @@ async def muter(moot):
     if muted:
         for i in muted:
             if str(i.sender) == str(moot.sender_id):
-                await moot.delete()
-                await moot.client(
-                    EditBannedRequest(moot.chat_id, moot.sender_id, rights))
+                try:
+                    await moot.delete()
+                    await moot.client(
+                        EditBannedRequest(moot.chat_id, moot.sender_id,
+                                          rights))
+                except (BadRequestError, UserAdminInvalidError,
+                        ChatAdminRequiredError, UserIdInvalidError):
+                    await moot.client.send_read_acknowledge(
+                        moot.chat_id, moot.id)
     for i in gmuted:
         if i.sender == str(moot.sender_id):
-            await moot.delete()
+            try:
+                await moot.delete()
+            except BadRequestError:
+                await moot.client.send_read_acknowledge(moot.chat_id, moot.id)
 
 
-@register(outgoing=True, pattern="^.ungmute(?: |$)(.*)", groups_only=True)
+@register(outgoing=True, pattern="^\.ungmute(?: |$)(.*)", groups_only=True)
 async def ungmoot(un_gmute):
     """ For .ungmute command, ungmutes the target in the userbot """
     # Admin or creator check
@@ -480,7 +489,7 @@ async def ungmoot(un_gmute):
                 f"CHAT: {un_gmute.chat.title}(`{un_gmute.chat_id}`)")
 
 
-@register(outgoing=True, pattern="^.gmute(?: |$)(.*)", groups_only=True)
+@register(outgoing=True, pattern="^\.gmute(?: |$)(.*)", groups_only=True)
 async def gspider(gspdr):
     """ For .gmute command, globally mutes the replied/tagged person """
     # Admin or creator check
@@ -524,7 +533,7 @@ async def gspider(gspdr):
                 f"CHAT: {gspdr.chat.title}(`{gspdr.chat_id}`)")
 
 
-@register(outgoing=True, pattern="^.zombies(?: |$)(.*)", groups_only=True)
+@register(outgoing=True, pattern="^\.zombies(?: |$)(.*)", groups_only=True)
 async def rm_deletedacc(show):
     """ For .delusers command, list all the ghost/deleted accounts in a chat. """
     if not show.is_group:
@@ -536,14 +545,13 @@ async def rm_deletedacc(show):
 
     if con != "clean":
         await show.edit("`Searching for zombie accounts...`")
-        async for user in show.client.iter_participants(show.chat_id,
-                                                        aggressive=True):
+        async for user in show.client.iter_participants(show.chat_id):
             if user.deleted:
                 del_u += 1
                 await sleep(1)
         if del_u > 0:
             del_status = f"Found **{del_u}** deleted account(s) in this group,\
-            \nclean them by using .delusers clean"
+            \nclean them by using `.zombies clean`"
 
         await show.edit(del_status)
         return
@@ -595,7 +603,7 @@ async def rm_deletedacc(show):
             \nCHAT: {show.chat.title}(`{show.chat_id}`)")
 
 
-@register(outgoing=True, pattern="^.admins$", groups_only=True)
+@register(outgoing=True, pattern="^\.admins$", groups_only=True)
 async def get_admin(show):
     """ For .admins command, list all of the admins of the chat. """
     info = await show.client.get_entity(show.chat_id)
@@ -629,14 +637,14 @@ async def get_admin(show):
         remove("adminlist.txt")
 
 
-@register(outgoing=True, pattern="^.bots$", groups_only=True)
+@register(outgoing=True, pattern="^\.bots$", groups_only=True)
 async def get_bots(show):
     """ For .bots command, list all of the bots of the chat. """
     info = await show.client.get_entity(show.chat_id)
     title = info.title if info.title else "this chat"
     mentions = f'<b>Bots in {title}:</b>\n'
     try:
-        if isinstance(message.to_id, PeerChat):
+        if isinstance(show.to_id, PeerChat):
             await show.edit("`I heard that only Supergroups can have bots.`")
             return
         else:
@@ -667,7 +675,7 @@ async def get_bots(show):
         remove("botlist.txt")
 
 
-@register(outgoing=True, pattern="^.pin(?: |$)(.*)", groups_only=True)
+@register(outgoing=True, pattern="^\.pin(?: |$)(.*)", groups_only=True)
 async def pin(msg):
     """ For .pin command, pins the replied/tagged message on the top the chat. """
     # Admin or creator check
@@ -712,7 +720,7 @@ async def pin(msg):
             f"LOUD: {not is_silent}")
 
 
-@register(outgoing=True, pattern="^.kick(?: |$)(.*)", groups_only=True)
+@register(outgoing=True, pattern="^\.kick(?: |$)(.*)", groups_only=True)
 async def kick(usr):
     """ For .kick command, kicks the replied/tagged person from the group. """
     # Admin or creator check
@@ -754,7 +762,7 @@ async def kick(usr):
             f"CHAT: {usr.chat.title}(`{usr.chat_id}`)\n")
 
 
-@register(outgoing=True, pattern="^.users ?(.*)", groups_only=True)
+@register(outgoing=True, pattern="^\.users ?(.*)", groups_only=True)
 async def get_users(show):
     """ For .users command, list all of the users in a chat. """
     info = await show.client.get_entity(show.chat_id)

@@ -66,6 +66,15 @@ LOGSPAMMER = sb(os.environ.get("LOGSPAMMER", "False"))
 # Bleep Blop, this is a bot ;)
 PM_AUTO_BAN = sb(os.environ.get("PM_AUTO_BAN", "False"))
 
+# Heroku Credentials for updater.
+HEROKU_APPNAME = os.environ.get("HEROKU_APPNAME", None)
+HEROKU_APIKEY = os.environ.get("HEROKU_APIKEY", None)
+
+# Custom (forked) repo URL for updater.
+UPSTREAM_REPO_URL = os.environ.get(
+    "UPSTREAM_REPO_URL",
+    "https://github.com/AvinashReddy3108/PaperplaneExtended.git")
+
 # Console verbose logging
 CONSOLE_LOGGER_VERBOSE = sb(os.environ.get("CONSOLE_LOGGER_VERBOSE", "False"))
 
@@ -148,10 +157,20 @@ for binary, path in binaries.items():
 # 'bot' variable
 if STRING_SESSION:
     # pylint: disable=invalid-name
-    bot = TelegramClient(StringSession(STRING_SESSION), API_KEY, API_HASH)
+    bot = TelegramClient(StringSession(STRING_SESSION),
+                         API_KEY,
+                         API_HASH,
+                         connection_retries=None,
+                         auto_reconnect=False,
+                         lang_code='en')
 else:
     # pylint: disable=invalid-name
-    bot = TelegramClient("userbot", API_KEY, API_HASH)
+    bot = TelegramClient("userbot",
+                         API_KEY,
+                         API_HASH,
+                         connection_retries=None,
+                         auto_reconnect=False,
+                         lang_code='en')
 
 
 async def check_botlog_chatid():
@@ -171,11 +190,12 @@ async def check_botlog_chatid():
         return
 
     entity = await bot.get_entity(BOTLOG_CHATID)
-    if entity.default_banned_rights.send_messages:
-        LOGS.info(
-            "Your account doesn't have rights to send messages to BOTLOG_CHATID "
-            "group. Check if you typed the Chat ID correctly.")
-        quit(1)
+    if not entity.creator:
+        if entity.default_banned_rights.send_messages:
+            LOGS.info(
+                "Your account doesn't have rights to send messages to BOTLOG_CHATID "
+                "group. Check if you typed the Chat ID correctly.")
+            quit(1)
 
 
 with bot:
